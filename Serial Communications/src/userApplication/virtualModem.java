@@ -100,7 +100,7 @@ public class virtualModem {
 			FileOutputStream timesStream = new FileOutputStream(times);		 	//Output Stream for times file
 
 			while((System.currentTimeMillis() - timeBegin) < totalRuntime) {
-				modem.write("E6736\r".getBytes());								// **********ATTENTION********** ALWAYS CHECK THE CURRENT SERVER SETTINGS
+				modem.write("EXXXX\r".getBytes());								// **********ATTENTION********** ALWAYS CHECK THE CURRENT SERVER SETTINGS
 				timeStart = System.currentTimeMillis();							//Start counting
 				
 				for (;;) {
@@ -136,6 +136,72 @@ public class virtualModem {
 			timesStream.close();
 		} //End of Echo Request Code method
 		
+		//Method for Image without Errors method
+		public void imageWithoutErrors(Modem modem) throws IOException {
+			int  k, countPixels = 0;
+			ArrayList<Integer> pixelsValue = new ArrayList<Integer>();  
+			
+			File imageFile = new File("imageWithoutErrors.jpeg");
+			FileOutputStream imageStream = new FileOutputStream(imageFile);
+			
+			modem.write(("MXXXX" + "CAM=PTZ" + "DIR=U" + "\r").getBytes());
+			for(;;) {
+				try {
+					k = modem.read();
+					if (k == -1) break;
+					pixelsValue.add(k);
+					countPixels++;
+				}
+				catch (Exception x) {
+					break;
+				}
+			}
+			
+			for (int i = 0; i < countPixels; i++) {
+				imageStream.write(pixelsValue.get(i));
+			}
+			
+			imageStream.close();	
+		} //End of Image without Errors method
+		
+		//Method for Image with Errors method
+		public void imageWithErrors(Modem modem) throws IOException {
+			int  k, countPixels = 0;
+			ArrayList<Integer> pixelsValue = new ArrayList<Integer>();  
+			
+			File imageFile = new File("imageWithErrors.jpeg");
+			FileOutputStream imageStream = new FileOutputStream(imageFile);
+
+			modem.write(("GXXXX" + "CAM=PTZ" + "DIR=U" + "\r").getBytes());
+			for(;;) {
+				try {
+					k = modem.read();
+					if (k == -1) break;
+					pixelsValue.add(k);
+					countPixels++;
+				}
+				catch (Exception x) {
+					break;
+				}
+			}
+
+			for (int i = 0; i < countPixels; i++) {
+				imageStream.write(pixelsValue.get(i));
+			}
+			
+			imageStream.close();
+		} //End of Image with Errors method
+		
+		//Method for GPS data
+		public void GPS(Modem modem) throws IOException, InterruptedException {
+			
+		} //End of GPS data
+		
+		//Method for ACK/NACK 
+		public void ackNack(Modem modem) throws IOException {
+			
+		}
+		
 		//Method for waking up the modem
 		public void wakeUpModem(Modem modem) {
 			int k;
@@ -166,25 +232,4 @@ public class virtualModem {
 		public void goToSleepModem(Modem modem) {
 			modem.close();
 		} //End of Method to close the communication with the modem
-		
-		//Method for Image without Errors method
-		public void imageWithoutErrors(Modem modem) throws IOException {
-			
-		} //End of Image without Errors method
-		
-		//Method for Image with Errors method
-		public void imageWithErrors(Modem modem) throws IOException {
-			
-		} //End of Image with Errors method
-		
-		//Method for GPS data
-		public void GPS(Modem modem) throws IOException, InterruptedException {
-			
-		} //End of GPS data
-		
-		//Method for ACK/NACK 
-		public void ackNack(Modem modem) throws IOException {
-			
-		}
-		
 }
