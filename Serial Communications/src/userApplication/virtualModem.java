@@ -1,15 +1,11 @@
 package userApplication;
 
-import ithakimodem.*;
-
-import java.util.Scanner; //Reading the input from user
-import java.util.ArrayList; //Handling ArrayLists
-import java.io.File; //File Handling
-import java.io.FileOutputStream;
-//import java.io.FileNotFoundException; //Handle not Found Exceptions
-//import java.io.FileOutputStream; //Writing to file.
-import java.io.IOException; //Handle File Errors
-//import java.util.Random;
+import ithakimodem.*;				//Modem library
+import java.util.Scanner; 			//Reading the input from user
+import java.util.ArrayList; 		//Handling ArrayLists
+import java.io.File; 				//File Handling
+import java.io.FileOutputStream;	//Writing to file
+import java.io.IOException; 		//Handle File Errors
 
 public class virtualModem {
 	
@@ -166,18 +162,18 @@ public class virtualModem {
 		
 		//Method for Image with Errors method
 		public void imageWithErrors(Modem modem) throws IOException {
-			int  k, countJPEGdata = 0;
-			ArrayList<Integer> jpegDataValue = new ArrayList<Integer>();  
+			int  k, countJPEGdata = 0;											//Counter for the number of messages received
+			ArrayList<Integer> jpegDataValue = new ArrayList<Integer>();  		//ArrayList for storing JPEG data
 			
 			File imageFile = new File("imageWithErrors.jpeg");
-			FileOutputStream imageStream = new FileOutputStream(imageFile);
+			FileOutputStream imageStream = new FileOutputStream(imageFile);		//File for saving the image data
 
 			modem.write(("GXXXX" + "CAM=PTZ" + "DIR=U" + "\r").getBytes());
 			for(;;) {
 				try {
 					k = modem.read();
 					if (k == -1) break;
-					jpegDataValue.add(k);
+					jpegDataValue.add(k);										//Storing the info
 					countJPEGdata++;
 				}
 				catch (Exception x) {
@@ -194,7 +190,7 @@ public class virtualModem {
 		
 		//Method for GPS data
 		public void GPS(Modem modem) throws IOException, InterruptedException { 
-			int  k, gpsDataCnt = 0, gpsDataGPGGACnt = 0, gpsImageCnt = 0;
+			int  k, gpsDataCnt = 0, gpsDataGPGGACnt = 0, gpsImageCnt = 0;			
 			String receivedMessage = "";
 			ArrayList<String> gpsData = new ArrayList<String>();
 			ArrayList<String> gpsDataGPGGA = new ArrayList<String>();
@@ -205,7 +201,8 @@ public class virtualModem {
 			FileOutputStream gpsTextStream = new FileOutputStream(gpsText);
 			FileOutputStream gpsImageStream = new FileOutputStream(gpsImage);
 			
-			modem.write(("PXXXX" + "R=1003297" +"\r").getBytes());
+			//Receive Text from GPS
+			modem.write(("PΧΧΧΧ" + "R=1000197" +"\r").getBytes());
 			for(;;) {
 				try {
 					k = modem.read();
@@ -228,13 +225,15 @@ public class virtualModem {
 					receivedMessage = "";
 				}
 			}
-			System.out.println("Total received GPGGA: " + gpsDataGPGGACnt);
+			//System.out.println("Total received GPGGA: " + gpsDataGPGGACnt);
 			for (int i = 0; i < gpsDataCnt; i++) {
 				gpsTextStream.write(gpsData.get(i).getBytes());
 			}
 			
 			gpsTextStream.close();
+			//All required messages from GPS are received.
 			
+			//Modify the data, calculate 9 random points with 4sec distance and receive Image from server.			
 		    int min = 1, max = 11;
 			String geographicLongitude = "";
 			String geographicLatitude = "";
@@ -251,14 +250,15 @@ public class virtualModem {
 			ArrayList<String> tValues = new ArrayList<String>();
 			//Start picking 9 random GPGGA messages
 			for (int i = 0; i < 9; i++) { // 9 loops
-				int rand_int = (int)(Math.random()*(max - min + 1) + min);
-				min += 9;
-				max += 9;
-				gpsDataGPGGARandom.add(gpsDataGPGGA.get(rand_int - 1)); //rand_int - 1 or i
-				System.out.println(rand_int);
-				System.out.print(gpsDataGPGGARandom.get(i));
-				System.out.println("Length of String = " + gpsDataGPGGARandom.get(i).length());
-				//18 19 20 21 23 24
+				int rand_int = (int)(Math.random()*(max - min + 1) + min);							//Random Number in [1 + i*9, 11 + i*9]
+				min += 9;																			//If we add number 9 in each loop we are sure that every
+				max += 9;																			//GPGGA message will have at least 9 sec time distance with the previous
+				gpsDataGPGGARandom.add(gpsDataGPGGA.get(rand_int - 1)); //rand_int - 1 or i			//Store the random GPGGA messages
+				//System.out.println(rand_int);
+				//System.out.print(gpsDataGPGGARandom.get(i));
+				//System.out.println("Length of String = " + gpsDataGPGGARandom.get(i).length());
+				
+				//18 19 20 21 23 24 are the character indexes for Latitude coords in a GPGGA message
 				degreesLatitude += (char)gpsDataGPGGARandom.get(i).charAt(18);
 				degreesLatitude += (char)gpsDataGPGGARandom.get(i).charAt(19);
 				minutesLatitude += (char)gpsDataGPGGARandom.get(i).charAt(20);
@@ -270,13 +270,13 @@ public class virtualModem {
 				
 				//Convert minutesDecimal to seconds
 				double tempSecondsLatitude = (double)Integer.parseInt(minutesDecimalLatitude)*60/10000;
-				System.out.println("Double value is: " + tempSecondsLatitude);
+				//System.out.println("Double value is: " + tempSecondsLatitude);
 				secondsLatitude = String.valueOf(tempSecondsLatitude);
 				indexOfDecimal = secondsLatitude.indexOf(".");
 				secondsLatitude = secondsLatitude.substring(0, indexOfDecimal);
-				System.out.println("Integer value is: " + secondsLatitude);
+				//System.out.println("Integer value is: " + secondsLatitude);
 				geographicLatitude = degreesLatitude + minutesLatitude + secondsLatitude;
-				System.out.println("Geographic Latitude = " + geographicLatitude);
+				//System.out.println("Geographic Latitude = " + geographicLatitude);
 				//End of converting minutesDecimal to seconds
 				
 				degreesLatitude = "";
@@ -284,7 +284,7 @@ public class virtualModem {
 				secondsLatitude = "";
 				minutesDecimalLatitude = "";
 				
-				//Same for Longitude
+				//31 32 33 34 36 37 38 39 are the character indexes for Longitude coords in a GPGGA message
 				degreesLongitude += (char)gpsDataGPGGARandom.get(i).charAt(31);
 				degreesLongitude += (char)gpsDataGPGGARandom.get(i).charAt(32);
 				minutesLongitude += (char)gpsDataGPGGARandom.get(i).charAt(33);
@@ -295,13 +295,13 @@ public class virtualModem {
 				minutesDecimalLongitude += (char)gpsDataGPGGARandom.get(i).charAt(39);
 				
 				double tempSecondsLongitude = (double)Integer.parseInt(minutesDecimalLongitude)*60/10000;
-				System.out.println("Double value is: " + tempSecondsLongitude);
+				//System.out.println("Double value is: " + tempSecondsLongitude);
 				secondsLongitude = String.valueOf(tempSecondsLongitude);
 				indexOfDecimal = secondsLongitude.indexOf(".");
 				secondsLongitude = secondsLongitude.substring(0, indexOfDecimal);
-				System.out.println("Integer value is: " + secondsLongitude);
+				//System.out.println("Integer value is: " + secondsLongitude);
 				geographicLongitude = degreesLongitude + minutesLongitude + secondsLongitude;
-				System.out.println("Geographic Longitude = " + geographicLongitude);
+				//System.out.println("Geographic Longitude = " + geographicLongitude);
 				
 				degreesLongitude = "";
 				minutesLongitude = "";
@@ -309,26 +309,25 @@ public class virtualModem {
 				minutesDecimalLongitude = "";
 				
 				tValues.add("T=" + geographicLongitude + geographicLatitude);
-				System.out.println("Olo mazi = " + tValues.get(i));
+				//System.out.println("All together = " + tValues.get(i));
 				geographicLongitude = "";
 				geographicLatitude = "";
 			}
 			
-			String receivedMessageImage = "";
-			ArrayList<Integer> gpsPixelsValue = new ArrayList<Integer>();
+			ArrayList<Integer> gpsImageDataValue = new ArrayList<Integer>();
 			
-			String pCodeToSend = "PXXXX";
+			String pCodeToSend = "PΧΧΧΧ";
 			for (int i = 0; i < 9; i++) {
 				pCodeToSend += tValues.get(i);
 			}
 			pCodeToSend += "\r\n";
-			System.out.println(pCodeToSend);
+			//System.out.println(pCodeToSend);
 			modem.write(pCodeToSend.getBytes());
 			for(;;) {
 				try {
 					k = modem.read();
 					if (k == -1) break;
-					gpsPixelsValue.add(k);
+					gpsImageDataValue.add(k);
 					gpsImageCnt++;
 				}
 				catch (Exception x) {
@@ -337,7 +336,7 @@ public class virtualModem {
 			}
 			
 			for(int i = 0; i < gpsImageCnt; i++) {
-				gpsImageStream.write(gpsPixelsValue.get(i));
+				gpsImageStream.write(gpsImageDataValue.get(i));
 			}
 			
 			gpsImageStream.close();
@@ -346,8 +345,89 @@ public class virtualModem {
 		
 		//Method for ACK/NACK 
 		public void ackNack(Modem modem) throws IOException {
+			int k, msgCnt = 0, ackCnt = 0, nackCnt = 0, retransmitTimes = 0, retransmitCnt = 0;
+			int L = 16 * 8; //16 characters * 8 bits per character. Server sends 8-bit characters even though Java uses 16 to store them
+			byte[] Ack = "Q6162\r".getBytes();
+			byte[] Nack = "R0576\r".getBytes();
+			byte[] txCode = Ack;
+			String receivedMessage = "";
+			long timeBegin = System.currentTimeMillis();
+			long timeDelta = 0, timeStart = 0;
+			long totalRuntime = 5*60*1000; //5 minutes loop in milliseconds
 			
-		}
+			ArrayList<String> sampleTimes = new ArrayList<String>();
+			ArrayList<String> sampleMessages = new ArrayList<String>();
+			ArrayList<String> sampleARQs = new ArrayList<String>();
+			
+			File ackNackMsg = new File("AckNackMessages.txt");
+			File ackNackTime = new File("AckNackTimes.txt");
+			File ackNackARQ = new File("AckNackRetransmissions.txt");
+			
+			FileOutputStream ackNackMsgStream = new FileOutputStream(ackNackMsg);
+			FileOutputStream ackNackTimeStream = new FileOutputStream(ackNackTime);
+			FileOutputStream ackNackARQStream = new FileOutputStream(ackNackARQ);
+			
+			while((System.currentTimeMillis() - timeBegin) < totalRuntime) {
+				modem.write(txCode);
+				timeStart = System.currentTimeMillis();
+				for(;;) {
+					try {
+						k = modem.read();
+						if (k == -1) break;
+						receivedMessage += (char)k;
+						if(receivedMessage.indexOf("PSTOP") > -1) {
+							timeDelta = System.currentTimeMillis() - timeStart;
+							System.out.println(receivedMessage);
+							msgCnt++;
+							
+							if(checksum(receivedMessage)) {
+								System.out.println("ACK!");
+								txCode = Ack;
+								ackCnt++;
+								sampleARQs.add(String.valueOf(retransmitTimes));
+								retransmitTimes = 0;
+								retransmitCnt++;
+							}
+							else {
+								System.out.println("NACK!");
+								txCode = Nack;
+								nackCnt++;
+								retransmitTimes++;
+							}
+						}
+					}
+					catch (Exception x) {
+						System.out.println(x);
+						break;
+					}
+				}
+				System.out.println("Time needed: " + timeDelta);
+				sampleTimes.add(String.valueOf(timeDelta));	
+				sampleMessages.add(receivedMessage);
+				receivedMessage = "";
+			}
+			
+			System.out.println("Total ack times = " + ackCnt);
+			System.out.println("Total nack times = " + nackCnt);
+			System.out.println("Total times = " + msgCnt);
+			double successProb = (double)ackCnt/msgCnt;
+			double ber = (1 - Math.pow(successProb,1.0/L));
+		    System.out.println("BER = " + ber);
+			
+			for (int i = 0; i < msgCnt; i++) {
+				ackNackMsgStream.write((sampleMessages.get(i) + "\r\n").getBytes());
+				ackNackTimeStream.write((sampleTimes.get(i) + "\r\n").getBytes());
+			}
+			
+			for (int i = 0; i < retransmitCnt; i++) {
+				ackNackARQStream.write((sampleARQs.get(i) + "\r\n").getBytes());
+			}
+			ackNackARQStream.write(("BER: " + ber + "\r\n").getBytes());
+			
+			ackNackMsgStream.close();
+			ackNackTimeStream.close();
+			ackNackARQStream.close();
+		} //End of ACK/NACK
 		
 		//Method for waking up the modem
 		public void wakeUpModem(Modem modem) {
@@ -379,4 +459,20 @@ public class virtualModem {
 		public void goToSleepModem(Modem modem) {
 			modem.close();
 		} //End of Method to close the communication with the modem
+		
+		//Method for checking the fcs with the encrypted message 
+		public boolean checksum(String packet) {
+			int leftOperand = packet.indexOf("<");
+			int rightOperand = packet.indexOf(">");
+			int fcsCode = Integer.parseInt(packet.substring(rightOperand+2, rightOperand+5));
+			int xorSeq = (int) packet.charAt(leftOperand + 1);
+			
+			for (int i = leftOperand + 2; i < rightOperand; i++) {
+				xorSeq ^= (int)packet.charAt(i);
+			}
+			
+			if (xorSeq == fcsCode) return true;
+			
+			return false;
+		}
 }
