@@ -27,11 +27,21 @@ where DD-MM-YYYY is the date, HH-MM-SS is the time and PC is the packet counter.
 
 Our application sends **Image Request Codes** of type "MXXXX\r" for error free image and "GXXXX\r" for image with errors. Along with the key numbers there are some parameters that can be set. The first parameter is **"CAM=FIX"** which will return an Image from the default position whereas a **"CAM=PTZ"** along with **"DIR=X"** where X = L(left), R(right), U(Up), D(down), will return an image from one of these 4 positions. The image from the server is a **.jpeg** encoded image of the front side of the Faculty of Electrical Engineering in Thessaloniki. 
 
+##### Erro-free Image
+
+![error Free Image](https://github.com/vamoirid/Computer-Networks/blob/master/Serial%20Communications/output/imageWithoutErrors.jpeg)
+
+##### Image with errors
+
+![Image with errors](https://github.com/vamoirid/Computer-Networks/blob/master/Serial%20Communications/output/imageWithErrors.jpeg)
+
 #### 4) GPS Request Code
 
 ---
 
 The application sends the **GPS Request Code** of type "PXXXX\r" two separate times for differrent types of data. The first time the request code is encoded like this: "PXXXXRTSSSSLL\r" where T is the number for 1 of the 9 predefined routes in the memory of the server, SSSS is the start point of the route and LL is the number of points that we want as a return. The data are decoded with respect to the **NMEA Protocol**. The **GPGGA** data returned from the GPS need to be decoded in order to find the coordinates in _degrees, minutes, seconds_. After the data are decoded we need to find the timestamp of each GPGGA message and choose 9 of them that are time-apart at least 4 seconds. After this is done, the coordinates of the 9 points that we chose can be used in order to receive an image with these points in it. To do that the PC needs to communicate again with the server but this time after the "PXXXX" sequence, we can add the sequence "TAABBCC" 9 times, where AA are the degrees, BB are the minutes and CC are the seconds. The results are something like this:
+
+![GPS Image](https://github.com/vamoirid/Computer-Networks/blob/master/Serial%20Communications/output/GPS.jpeg)
 
 #### 5) ACK/NACK Code
 
