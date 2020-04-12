@@ -90,13 +90,13 @@ public class virtualModem {
 			ArrayList<String> sampleMessages = new ArrayList<String>(); 		//Stores the messages
 			ArrayList<String> sampleTimes = new ArrayList<String>();    		//Stores time needed for each message to be transmitted
 			
-			File echo = new File("echo.txt");									//File to store server messages.
-			File times = new File("timesEcho.txt");								//File to store transaction time for server messages
+			File echo = new File("output/echo.txt");									//File to store server messages.
+			File times = new File("output/timesEcho.txt");								//File to store transaction time for server messages
 			FileOutputStream echoStream = new FileOutputStream(echo);  		 	//Output Stream for echo file
 			FileOutputStream timesStream = new FileOutputStream(times);		 	//Output Stream for times file
 
 			while((System.currentTimeMillis() - timeBegin) < totalRuntime) {
-				modem.write("EXXXX\r".getBytes());								// **********ATTENTION********** ALWAYS CHECK THE CURRENT SERVER SETTINGS
+				modem.write("Ε4012\r".getBytes());								// **********ATTENTION********** ALWAYS CHECK THE CURRENT SERVER SETTINGS
 				timeStart = System.currentTimeMillis();							//Start counting
 				
 				for (;;) {
@@ -137,10 +137,10 @@ public class virtualModem {
 			int  k, countJPEGdata = 0;											//Counter for the number of messages received
 			ArrayList<Integer> jpegDataValue = new ArrayList<Integer>();  		//ArrayList for storing JPEG data
 			
-			File imageFile = new File("imageWithoutErrors.jpeg");
+			File imageFile = new File("output/imageWithoutErrors.jpeg");
 			FileOutputStream imageStream = new FileOutputStream(imageFile);		//File for saving the image data
 			
-			modem.write(("MXXXX" + "CAM=PTZ" + "DIR=U" + "\r").getBytes());
+			modem.write(("M1888" + "CAM=PTZ" + "DIR=U" + "\r").getBytes());
 			for(;;) {
 				try {
 					k = modem.read();
@@ -168,7 +168,7 @@ public class virtualModem {
 			File imageFile = new File("imageWithErrors.jpeg");
 			FileOutputStream imageStream = new FileOutputStream(imageFile);		//File for saving the image data
 
-			modem.write(("GXXXX" + "CAM=PTZ" + "DIR=U" + "\r").getBytes());
+			modem.write(("G3997" + "CAM=PTZ" + "DIR=U" + "\r").getBytes());
 			for(;;) {
 				try {
 					k = modem.read();
@@ -196,13 +196,13 @@ public class virtualModem {
 			ArrayList<String> gpsDataGPGGA = new ArrayList<String>();
 			ArrayList<String> gpsDataGPGGARandom = new ArrayList<String>();
 			
-			File gpsText = new File("GPS.txt");
-			File gpsImage = new File("GPS.jpeg");
+			File gpsText = new File("output/GPS.txt");
+			File gpsImage = new File("ouput/GPS.jpeg");
 			FileOutputStream gpsTextStream = new FileOutputStream(gpsText);
 			FileOutputStream gpsImageStream = new FileOutputStream(gpsImage);
 			
 			//Receive Text from GPS
-			modem.write(("PΧΧΧΧ" + "R=1000197" +"\r").getBytes());
+			modem.write(("P8401" + "R=1000197" +"\r").getBytes());
 			for(;;) {
 				try {
 					k = modem.read();
@@ -316,7 +316,7 @@ public class virtualModem {
 			
 			ArrayList<Integer> gpsImageDataValue = new ArrayList<Integer>();
 			
-			String pCodeToSend = "PΧΧΧΧ";
+			String pCodeToSend = "P8401";
 			for (int i = 0; i < 9; i++) {
 				pCodeToSend += tValues.get(i);
 			}
@@ -347,8 +347,8 @@ public class virtualModem {
 		public void ackNack(Modem modem) throws IOException {
 			int k, msgCnt = 0, ackCnt = 0, nackCnt = 0, retransmitTimes = 0, retransmitCnt = 0;
 			int L = 16 * 8; //16 characters * 8 bits per character. Server sends 8-bit characters even though Java uses 16 to store them
-			byte[] Ack = "Q6162\r".getBytes();
-			byte[] Nack = "R0576\r".getBytes();
+			byte[] Ack = "Q5538\r".getBytes();
+			byte[] Nack = "R0832\r".getBytes();
 			byte[] txCode = Ack;
 			String receivedMessage = "";
 			long timeBegin = System.currentTimeMillis();
